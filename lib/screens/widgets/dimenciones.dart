@@ -1,0 +1,1 @@
+const anchoMovil = 600;
