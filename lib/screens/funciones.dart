@@ -83,7 +83,7 @@ Future<void> inicio_sesion(
         Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => const MovilScreen(),
+              builder: (context) => screen,
             ));
         break;
 
@@ -177,6 +177,7 @@ Future<void> cerrar_sesion(context) async {
         lista_p.clear();
         valores.clear();
         valores_nuevos.value.clear();
+        Navigator.of(context).pop();
         Navigator.pushReplacement(
             context,
             MaterialPageRoute(

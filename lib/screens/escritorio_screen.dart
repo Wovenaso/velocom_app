@@ -1,5 +1,7 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:velocom_app/screens/widgets/barraNav.dart';
 import 'package:velocom_app/screens/widgets/dialogoPer.dart';
 import 'package:velocom_app/screens/widgets/listaPuertos.dart';
 import 'funciones.dart';
@@ -8,11 +10,11 @@ class EscritorioScreen extends StatefulWidget {
   const EscritorioScreen({super.key});
 
   @override
-  State<EscritorioScreen> createState() => _EscritorioScreenState();
+  State<EscritorioScreen> createState() => _EscritorioScreen();
 }
 
-class _EscritorioScreenState extends State<EscritorioScreen> {
-    @override
+class _EscritorioScreen extends State<EscritorioScreen> {
+  @override
   void initTimer(context) {
     if (timer != null && timer!.isActive) return;
 
@@ -34,16 +36,15 @@ class _EscritorioScreenState extends State<EscritorioScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.logout),
-        onPressed: () {
-          timer?.cancel();
-          cerrar_sesion(context);
-        },
-      ),
       appBar: AppBar(
-        title: const Text("Velocom Movil"),
+        title: Image.asset("images/logovelocom.png",
+                    width: 100, height: 70),
         actions: <Widget>[
+
+          const Text("Monitoreo", 
+          style: TextStyle(
+            height: 4.0,
+            leadingDistribution: TextLeadingDistribution.even),),
           Switch.adaptive(
             value: estMonitoreo,
             onChanged: (bool? value) {
@@ -57,29 +58,41 @@ class _EscritorioScreenState extends State<EscritorioScreen> {
                 }
               });
             },
-          )
+          ),
+          const SizedBox(width: 70),
+          IconButton(
+            onPressed: () {
+              showDialog(
+                          context: context,
+                          builder: (context) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          },
+                        );
+                timer?.cancel();
+                cerrar_sesion(context);
+            },
+             icon: const Icon(Icons.logout)),
         ],
       ),
       backgroundColor: Colors.deepOrange[50],
-      body: Column(children: [
-        AspectRatio(
-            aspectRatio: 16/9,
-            child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Container(
-                  height: 600,
-                  color: Colors.orange[200],
-                  child: ValueListenableBuilder(
-                    valueListenable: valores_nuevos,
-                    builder: (BuildContext context, value, Widget? child) {
-                      return ListViewPuertos(
-                        puertos: lista_p,
-                        valores: valores_nuevos.value,
-                      );
-                    },
-                  ),
-                )))
-      ]),
+      body: SingleChildScrollView(
+        child: Column(children: [
+          Container(
+            height: 900,
+            color: Colors.orange[200],
+            child: ValueListenableBuilder(
+              valueListenable: valores_nuevos,
+              builder: (BuildContext context, value, Widget? child) {
+                return ListViewPuertos(
+                  puertos: lista_p,
+                  valores: valores_nuevos.value,
+                );
+              },
+            ),
+          )
+        ]),
+      ),
     );
   }
 }
