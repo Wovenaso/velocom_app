@@ -1,14 +1,20 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:velocom_app/screens/escritorio_screen.dart';
 import 'package:velocom_app/screens/log_in.dart';
 import 'dart:convert';
 
 import 'package:velocom_app/screens/movil_screen.dart';
 import 'package:velocom_app/screens/widgets/dialogoPer.dart';
+import 'package:velocom_app/screens/widgets/responsive_layout.dart';
 
 TextEditingController userCon = TextEditingController();
 TextEditingController passCon = TextEditingController();
 TextEditingController dispCon = TextEditingController();
+
+Timer? timer;
+bool estMonitoreo = false;
 
 String tipo = '';
 List<dynamic> lista_p = [];
@@ -23,8 +29,21 @@ Future<void> inicio_sesion(
   print(pass);
   print(disp);
 
-  var url = Uri.parse("http://192.168.20.196:5000/inicio");
+  var url = Uri.parse("http://10.254.254.128:5000/inicio");
   var respuesta;
+
+  if (user.isEmpty) {
+    Navigator.of(context).pop();
+    alertaPersonalizada(context, Colors.amber, "Escriba un usuario");
+    return;
+  }
+  if (disp.isEmpty) {
+    Navigator.of(context).pop();
+    alertaPersonalizada(
+        context, Colors.amber, "Escriba un dispositivo al que conectarse");
+    return;
+  }
+
 
   try {
     var obj =
@@ -32,14 +51,7 @@ Future<void> inicio_sesion(
 
     respuesta = await http.post(url,
         headers: {"Content-Type": 'application/json'}, body: obj);
-  } on Exception catch (e) {
-    userCon.clear();
-    passCon.clear();
-    dispCon.clear();
-    print(e);
 
-    alertaPersonalizada(context, Colors.amber, "La API no esta funcionando");
-  } finally {
     print(respuesta?.statusCode);
     switch (respuesta?.statusCode) {
       case 200:
@@ -60,6 +72,9 @@ Future<void> inicio_sesion(
         valores_nuevos.value = List<dynamic>.generate(lista_p.length, (index) {
           return [0, 0];
         });
+
+        var screen = ResponsiveLayout(
+            movilBody: const MovilScreen(), escritorioBody: const EscritorioScreen());
 
         userCon.clear();
         passCon.clear();
@@ -98,6 +113,15 @@ Future<void> inicio_sesion(
         Navigator.of(context).pop();
         alertaPersonalizada(context, Colors.amber, r['mensaje']);
         break;
+
+      case 410:
+        Map r = jsonDecode(respuesta.body);
+        userCon.clear();
+        passCon.clear();
+        dispCon.clear();
+        Navigator.of(context).pop();
+        alertaPersonalizada(context, Colors.amber, r['mensaje']);
+        break;
       case 500:
         Map r = jsonDecode(respuesta.body);
         userCon.clear();
@@ -107,112 +131,111 @@ Future<void> inicio_sesion(
         r['mensaje'];
         break;
     }
+  } on Exception catch (e) {
+    userCon.clear();
+    passCon.clear();
+    dispCon.clear();
+    print(e);
+    Navigator.of(context).pop();
+    alertaPersonalizada(context, Colors.amber, "ERROR: ${e.toString()}");
   }
 }
+
+
+
+
 
 Future<void> cerrar_sesion(context) async {
-  var url = Uri.parse("http://192.168.20.196:5000/cerrar");
+  var url = Uri.parse("http://10.254.254.128:5000/cerrar");
   var respuesta;
+  String mensaje = '';
+  Color color = Colors.transparent;
 
-  try {
-    respuesta = await http.get(url);
-  } on Exception catch (e) {
-    alertaPersonalizada(context, Colors.red, "Error\n${e}");
-  } finally {
-    if (respuesta?.statusCode == 200) {
-      lista_p.clear();
-      valores.clear();
-      valores_nuevos.value.clear();
-      Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const LoginScreen(),
-          ));
-      userCon.clear();
-      passCon.clear();
-      dispCon.clear();
-      alertaPersonalizada(context, Colors.green, "Se cerro la sesion");
-    }
+  if (usuario_activo.isEmpty) {
+    alertaPersonalizada(context, Colors.amber, "No hay usuario conectado");
+    lista_p.clear();
+    valores.clear();
+    valores_nuevos.value.clear();
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const LoginScreen(),
+        ));
+    userCon.clear();
+    passCon.clear();
+    dispCon.clear();
   }
 
-  // if (usuario_activo.isEmpty) {
-  //   alertaPersonalizada(context, Colors.amber, "No hay usuario conectado");
-  //   lista_p.clear();
-  //   valores.clear();
-  //   valores_nuevos.value.clear();
-  //   Navigator.pushReplacement(
-  //       context,
-  //       MaterialPageRoute(
-  //         builder: (context) => const LoginScreen(),
-  //       ));
-  //   userCon.clear();
-  //   passCon.clear();
-  //   dispCon.clear();
-  // }
+  try {
+    var obj = jsonEncode({'usuario': usuario_activo});
 
-  // try {
-  //   var obj = jsonEncode({'usuario': usuario_activo});
+    respuesta = await http.post(url,
+        headers: {"Content-Type": 'application/json'}, body: obj);
 
-  //   respuesta = await http.post(url,
-  //       headers: {"Content-Type": 'application/json'}, body: obj);
-  // } on Exception catch (e) {
-  //   userCon.clear();
-  //   passCon.clear();
-  //   dispCon.clear();
-  //   alertaPersonalizada(
-  //       context, Colors.amber, "Se capturo la siguiente excepcion\n ${e}");
-  //   print(e);
-
-  //   alertaPersonalizada(context, Colors.amber, "La API no esta funcionando");
-  // } finally {
-  //   switch (respuesta?.statusCode) {
-  //     case 200:
-  //       lista_p.clear();
-  //       valores.clear();
-  //       valores_nuevos.value.clear();
-  //       Navigator.pushReplacement(
-  //           context,
-  //           MaterialPageRoute(
-  //             builder: (context) => const LoginScreen(),
-  //           ));
-  //       userCon.clear();
-  //       passCon.clear();
-  //       dispCon.clear();
-  //       alertaPersonalizada(
-  //           context, Colors.green, "Se cerro la sesion adecuadamente");
-  //       break;
-  //     case 400:
-  //       lista_p.clear();
-  //       valores.clear();
-  //       valores_nuevos.value.clear();
-  //       Navigator.pushReplacement(
-  //           context,
-  //           MaterialPageRoute(
-  //             builder: (context) => const LoginScreen(),
-  //           ));
-  //       userCon.clear();
-  //       passCon.clear();
-  //       dispCon.clear();
-  //       Map r = jsonDecode(respuesta.body);
-  //       alertaPersonalizada(
-  //           context, Colors.green, "Se detecto un error al cerrar la sesion\nMensaje: ${r['mensaje']}");
-  //       break;
-  // }
-  //}
+    switch (respuesta?.statusCode) {
+      case 200:
+        lista_p.clear();
+        valores.clear();
+        valores_nuevos.value.clear();
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const LoginScreen(),
+            ));
+        userCon.clear();
+        passCon.clear();
+        dispCon.clear();
+        color = Colors.green;
+        mensaje = "Se cerro la sesion adecuadamente";
+        break;
+      case 400:
+        lista_p.clear();
+        valores.clear();
+        valores_nuevos.value.clear();
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const LoginScreen(),
+            ));
+        userCon.clear();
+        passCon.clear();
+        dispCon.clear();
+        Map r = jsonDecode(respuesta.body);
+        mensaje = r['mensaje'];
+        color = Colors.amber;
+        break;
+    }
+  } on Exception catch (e) {
+    userCon.clear();
+    passCon.clear();
+    dispCon.clear();
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const LoginScreen(),
+        ));
+    mensaje = "Se capturo la siguiente excepcion\n ${e}";
+    color = Colors.amber;
+    print(e);
+  } finally {
+    alertaPersonalizada(context, color, mensaje);
+  }
 }
 
+
+
+
+
+//-----------------------------MONITOREO-----------------------------
 Future<void> monitoreo(context) async {
   var temp1, temp2, respuesta;
   try {
     http.Response respuesta =
-        await http.get(Uri.parse('http://192.168.20.196:5000/monitor'));
-  } on Exception catch (e) {
-    alertaPersonalizada(context, Colors.amber, "Error\n${e}");
-  } finally {
-    // TODO
-    switch (respuesta?.statusCode) {
+        await http.get(Uri.parse('http://10.254.254.128:5000/monitor'));
+
+    switch (respuesta.statusCode) {
       case 200:
-        temp1 = jsonDecode(respuesta?.body);
+        temp1 = jsonDecode(respuesta.body);
         temp2 = temp1['monitor'];
 
         valores_nuevos.value = List<dynamic>.generate(temp2.length, (index) {
@@ -221,7 +244,8 @@ Future<void> monitoreo(context) async {
         break;
 
       case 400:
-        Map r = jsonDecode(respuesta?.body);
+        timer?.cancel();
+        Map r = jsonDecode(respuesta.body);
         alertaPersonalizada(
           context,
           Colors.red,
@@ -230,7 +254,8 @@ Future<void> monitoreo(context) async {
         break;
 
       case 401:
-        Map r = jsonDecode(respuesta?.body);
+        timer?.cancel();
+        Map r = jsonDecode(respuesta.body);
         lista_p.clear();
         valores.clear();
         valores_nuevos.value.clear();
@@ -252,7 +277,8 @@ Future<void> monitoreo(context) async {
         break;
 
       case 402:
-        Map r = jsonDecode(respuesta?.body);
+        timer?.cancel();
+        Map r = jsonDecode(respuesta.body);
         alertaPersonalizada(
           context,
           Colors.red,
@@ -261,7 +287,31 @@ Future<void> monitoreo(context) async {
         break;
 
       case 403:
-        Map r = jsonDecode(respuesta?.body);
+        timer?.cancel();
+        Map r = jsonDecode(respuesta.body);
+        alertaPersonalizada(
+          context,
+          Colors.red,
+          r['mensaje'],
+        );
+        break;
+
+      case 404:
+        timer?.cancel();
+        Map r = jsonDecode(respuesta.body);
+        lista_p.clear();
+        valores.clear();
+        valores_nuevos.value.clear();
+
+        userCon.clear();
+        passCon.clear();
+        dispCon.clear();
+
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const LoginScreen(),
+            ));
         alertaPersonalizada(
           context,
           Colors.red,
@@ -270,7 +320,7 @@ Future<void> monitoreo(context) async {
         break;
 
       case 500:
-        Map r = jsonDecode(respuesta?.body);
+        Map r = jsonDecode(respuesta.body);
         lista_p.clear();
         valores.clear();
         valores_nuevos.value.clear();
@@ -292,7 +342,7 @@ Future<void> monitoreo(context) async {
         break;
 
       case 501:
-        Map r = jsonDecode(respuesta?.body);
+        Map r = jsonDecode(respuesta.body);
         lista_p.clear();
         valores.clear();
         valores_nuevos.value.clear();
@@ -313,13 +363,19 @@ Future<void> monitoreo(context) async {
         );
         break;
     }
-  }
+  } on Exception catch (e) {
+    alertaPersonalizada(context, Colors.amber, "Error\n${e}");
+  } finally {}
 }
+
+
+
+
 
 Future<void> apagar_encender(int index, context) async {
   bool estado;
-  var url_enc = Uri.parse("http://192.168.20.196:5000/puerto?comm=encender");
-  var url_apa = Uri.parse("http://192.168.20.196:5000/puerto?comm=apagar");
+  var url_enc = Uri.parse("http://10.254.254.128:5000/puerto?comm=encender");
+  var url_apa = Uri.parse("http://10.254.254.128:5000/puerto?comm=apagar");
   var resp_apa_enc;
   try {
     estado = lista_p[index][2];
@@ -328,35 +384,36 @@ Future<void> apagar_encender(int index, context) async {
       resp_apa_enc = await http.post(url_enc,
           headers: {"Content-Type": 'application/json'}, body: obj);
 
-      switch (resp_apa_enc?.statusCode) {
-        case 200:
-          alertaPersonalizada(
-              context, Colors.green, "El puerto se encendio correctamente");
-          break;
-        case 400:
-          alertaPersonalizada(
-              context, Colors.amber, "Hubo un error al encender el puerto");
-          break;
-      }
+      // switch (resp_apa_enc?.statusCode) {
+      //   case 200:
+      //     alertaPersonalizada(
+      //         context, Colors.green, "El puerto se encendio correctamente");
+      //     break;
+      //   case 400:
+      //     alertaPersonalizada(
+      //         context, Colors.amber, "Hubo un error al encender el puerto");
+      //     break;
+      // }
     } else if (estado) {
       var obj = jsonEncode({"puerto": index.toString()});
       resp_apa_enc = await http.post(url_apa,
           headers: {"Content-Type": 'application/json'}, body: obj);
 
-      switch (resp_apa_enc?.statusCode) {
-        case 200:
-          alertaPersonalizada(
-              context, Colors.green, "El puerto se apago correctamente");
-          //lista_p[index][2] = !estado;
-          break;
-        case 400:
-          alertaPersonalizada(
-              context, Colors.amber, "Hubo un error al apagar el puerto");
-          break;
-      }
+      // switch (resp_apa_enc?.statusCode) {
+      //   case 200:
+      //     alertaPersonalizada(
+      //         context, Colors.green, "El puerto se apago correctamente");
+      //     //lista_p[index][2] = !estado;
+      //     break;
+      //   case 400:
+      //     alertaPersonalizada(
+      //         context, Colors.amber, "Hubo un error al apagar el puerto");
+      //     break;
+      // }
     }
   } on Exception catch (e) {
-    alertaPersonalizada(context, Colors.red, "Error apagar o encender puerto\n${e.toString()}");
+    alertaPersonalizada(
+        context, Colors.red, "Error apagar o encender puerto\n${e.toString()}");
   }
 }
 

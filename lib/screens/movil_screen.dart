@@ -14,9 +14,6 @@ class MovilScreen extends StatefulWidget {
 }
 
 class _MovilScreenState extends State<MovilScreen> {
-  bool estMonitoreo = false;
-  Timer? timer;
-
   @override
   void initTimer(context) {
     if (timer != null && timer!.isActive) return;
@@ -39,15 +36,15 @@ class _MovilScreenState extends State<MovilScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.logout),
-        onPressed: () {
-          cerrar_sesion(context);
-        },
-      ),
       appBar: AppBar(
-        title: const Text("Velocom Movil"),
+        title: Image.asset("images/logovelocom.png",
+                    width: 100, height: 70),
         actions: <Widget>[
+
+          const Text("Monitoreo", 
+          style: TextStyle(
+            height: 4.0,
+            leadingDistribution: TextLeadingDistribution.even),),
           Switch.adaptive(
             value: estMonitoreo,
             onChanged: (bool? value) {
@@ -61,29 +58,34 @@ class _MovilScreenState extends State<MovilScreen> {
                 }
               });
             },
-          )
+          ),
+          const SizedBox(width: 70),
+          IconButton(
+            onPressed: () {
+                timer?.cancel();
+                cerrar_sesion(context);
+            },
+             icon: const Icon(Icons.logout)),
         ],
       ),
       backgroundColor: Colors.deepOrange[50],
-      body: Column(children: [
-        AspectRatio(
-            aspectRatio: 7 / 8,
-            child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Container(
-                  height: 700,
-                  color: Colors.orange[200],
-                  child: ValueListenableBuilder(
-                    valueListenable: valores_nuevos,
-                    builder: (BuildContext context, value, Widget? child) {
-                      return ListViewPuertos(
-                        puertos: lista_p,
-                        valores: valores_nuevos.value,
-                      );
-                    },
-                  ),
-                )))
-      ]),
+      body: SingleChildScrollView(
+        child: Column(children: [
+          Container(
+            height: 900,
+            color: Colors.orange[200],
+            child: ValueListenableBuilder(
+              valueListenable: valores_nuevos,
+              builder: (BuildContext context, value, Widget? child) {
+                return ListViewPuertos(
+                  puertos: lista_p,
+                  valores: valores_nuevos.value,
+                );
+              },
+            ),
+          )
+        ]),
+      ),
     );
   }
 }
