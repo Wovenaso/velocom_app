@@ -18,9 +18,11 @@ class _ListViewPuertos extends State<ListViewPuertos> {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
+
       itemCount: widget.puertos.length,
       itemBuilder: (context, index) {
         return CheckboxListTile(
+          tileColor: Colors.orange[200],
           value: widget.puertos[index][2],
           title: Text(
               "${widget.puertos[index][0]} \nDesc: ${widget.puertos[index][1]}"),
@@ -36,7 +38,6 @@ class _ListViewPuertos extends State<ListViewPuertos> {
                   msj =
                       "Deseas encender el puerto ${widget.puertos[index][0]}?";
                 }
-
                 return AlertDialog(
                   title: const Text("Apagar/Prender Puerto"),
                   content: Text(msj),

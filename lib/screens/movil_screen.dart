@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:velocom_app/screens/widgets/barraNav.dart';
 import 'package:velocom_app/screens/widgets/dialogoPer.dart';
 import 'package:velocom_app/screens/widgets/listaPuertos.dart';
 import 'funciones.dart';
@@ -37,14 +36,13 @@ class _MovilScreenState extends State<MovilScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Image.asset("images/logovelocom.png",
-                    width: 100, height: 70),
+        title: Image.asset("images/logovelocom.png", width: 100, height: 70),
         actions: <Widget>[
-
-          const Text("Monitoreo", 
-          style: TextStyle(
-            height: 4.0,
-            leadingDistribution: TextLeadingDistribution.even),),
+          const Text(
+            "Monitoreo",
+            style: TextStyle(
+                height: 4.0, leadingDistribution: TextLeadingDistribution.even),
+          ),
           Switch.adaptive(
             value: estMonitoreo,
             onChanged: (bool? value) {
@@ -61,19 +59,24 @@ class _MovilScreenState extends State<MovilScreen> {
           ),
           const SizedBox(width: 70),
           IconButton(
-            onPressed: () {
+              onPressed: () {
+                showDialog(
+                  barrierDismissible: false,
+                  context: context,
+                  builder: (context) {
+                    return const Center(child: CircularProgressIndicator());
+                  },
+                );
                 timer?.cancel();
                 cerrar_sesion(context);
-            },
-             icon: const Icon(Icons.logout)),
+              },
+              icon: const Icon(Icons.logout)),
         ],
       ),
-      backgroundColor: Colors.deepOrange[50],
-      body: SingleChildScrollView(
-        child: Column(children: [
-          Container(
-            height: 900,
-            color: Colors.orange[200],
+      body: Column(children: [
+        SingleChildScrollView(
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height - 100,
             child: ValueListenableBuilder(
               valueListenable: valores_nuevos,
               builder: (BuildContext context, value, Widget? child) {
@@ -83,9 +86,8 @@ class _MovilScreenState extends State<MovilScreen> {
                 );
               },
             ),
-          )
-        ]),
-      ),
+          )),
+      ]),
     );
   }
 }

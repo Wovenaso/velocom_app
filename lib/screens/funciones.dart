@@ -11,7 +11,7 @@ import 'package:velocom_app/screens/widgets/responsive_layout.dart';
 
 TextEditingController userCon = TextEditingController();
 TextEditingController passCon = TextEditingController();
-TextEditingController dispCon = TextEditingController();
+String dispCon = "";
 
 Timer? timer;
 bool estMonitoreo = false;
@@ -19,9 +19,43 @@ bool estMonitoreo = false;
 String tipo = '';
 List<dynamic> lista_p = [];
 List<dynamic> valores = [];
+List<dynamic> dispositivos = [];
 String usuario_activo = "";
 
 final valores_nuevos = ValueNotifier<List<dynamic>>([0, 0]);
+final disp_disponibles = ValueNotifier<List<dynamic>>([0, 0]);
+
+Future<void> obtener_dispositivos(context) async {
+  var url = Uri.parse("http://10.254.254.128:5000/dispositivos");
+
+  //try {
+  http.Response respuesta = await http.get(url);
+
+  switch (respuesta.statusCode) {
+    case 200:
+      var temp = jsonDecode(respuesta.body);
+      print(temp);
+      dispositivos = temp['dispositivos'];
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const LoginScreen(),
+          ));
+      break;
+    case 400:
+      alertaPersonalizada(
+          context, Colors.amber, "Ocurrio un error inesperado, 400");
+      break;
+    case 500:
+      alertaPersonalizada(
+          context, Colors.amber, "Ocurrio un error inesperado, 500");
+      break;
+  }
+  //} catch (e) {
+//print(e);
+  // alertaPersonalizada(context, Colors.amber, "Ocurrio un error inesperado");
+  // }
+}
 
 Future<void> inicio_sesion(
     String user, String pass, String disp, context) async {
@@ -44,10 +78,8 @@ Future<void> inicio_sesion(
     return;
   }
 
-
   try {
-    var obj =
-        jsonEncode({'nombre_disp': disp, 'usuario': user, 'contra': pass});
+    var obj = jsonEncode({'disp': disp, 'usuario': user, 'contra': pass});
 
     respuesta = await http.post(url,
         headers: {"Content-Type": 'application/json'}, body: obj);
@@ -65,6 +97,8 @@ Future<void> inicio_sesion(
         tipo = r['tipo'];
         lista_p = r['puertos'];
 
+        print(lista_p);
+
         valores = List<dynamic>.generate(lista_p.length, (i) {
           return [0, 0];
         });
@@ -74,16 +108,17 @@ Future<void> inicio_sesion(
         });
 
         var screen = ResponsiveLayout(
-            movilBody: const MovilScreen(), escritorioBody: const EscritorioScreen());
+            movilBody: const MovilScreen(),
+            escritorioBody: const EscritorioScreen());
 
         userCon.clear();
         passCon.clear();
-        dispCon.clear();
+        dispCon = "";
         Navigator.of(context).pop();
         Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => const MovilScreen(),
+              builder: (context) => screen,
             ));
         break;
 
@@ -91,7 +126,7 @@ Future<void> inicio_sesion(
         Map r = jsonDecode(respuesta.body);
         userCon.clear();
         passCon.clear();
-        dispCon.clear();
+        dispCon = "";
         Navigator.of(context).pop();
         alertaPersonalizada(context, Colors.amber, r['mensaje']);
         break;
@@ -100,7 +135,7 @@ Future<void> inicio_sesion(
         Map r = jsonDecode(respuesta.body);
         userCon.clear();
         passCon.clear();
-        dispCon.clear();
+        dispCon = "";
         Navigator.of(context).pop();
         alertaPersonalizada(context, Colors.amber, r['mensaje']);
         break;
@@ -109,7 +144,7 @@ Future<void> inicio_sesion(
         Map r = jsonDecode(respuesta.body);
         userCon.clear();
         passCon.clear();
-        dispCon.clear();
+        dispCon = "";
         Navigator.of(context).pop();
         alertaPersonalizada(context, Colors.amber, r['mensaje']);
         break;
@@ -118,7 +153,7 @@ Future<void> inicio_sesion(
         Map r = jsonDecode(respuesta.body);
         userCon.clear();
         passCon.clear();
-        dispCon.clear();
+        dispCon = "";
         Navigator.of(context).pop();
         alertaPersonalizada(context, Colors.amber, r['mensaje']);
         break;
@@ -126,7 +161,7 @@ Future<void> inicio_sesion(
         Map r = jsonDecode(respuesta.body);
         userCon.clear();
         passCon.clear();
-        dispCon.clear();
+        dispCon = "";
         Navigator.of(context).pop();
         r['mensaje'];
         break;
@@ -134,16 +169,12 @@ Future<void> inicio_sesion(
   } on Exception catch (e) {
     userCon.clear();
     passCon.clear();
-    dispCon.clear();
+    dispCon = "";
     print(e);
     Navigator.of(context).pop();
     alertaPersonalizada(context, Colors.amber, "ERROR: ${e.toString()}");
   }
 }
-
-
-
-
 
 Future<void> cerrar_sesion(context) async {
   var url = Uri.parse("http://10.254.254.128:5000/cerrar");
@@ -156,6 +187,7 @@ Future<void> cerrar_sesion(context) async {
     lista_p.clear();
     valores.clear();
     valores_nuevos.value.clear();
+    Navigator.of(context).pop();
     Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -163,7 +195,7 @@ Future<void> cerrar_sesion(context) async {
         ));
     userCon.clear();
     passCon.clear();
-    dispCon.clear();
+    dispCon = "";
   }
 
   try {
@@ -177,6 +209,7 @@ Future<void> cerrar_sesion(context) async {
         lista_p.clear();
         valores.clear();
         valores_nuevos.value.clear();
+        Navigator.of(context).pop();
         Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -184,7 +217,7 @@ Future<void> cerrar_sesion(context) async {
             ));
         userCon.clear();
         passCon.clear();
-        dispCon.clear();
+        dispCon = "";
         color = Colors.green;
         mensaje = "Se cerro la sesion adecuadamente";
         break;
@@ -192,6 +225,7 @@ Future<void> cerrar_sesion(context) async {
         lista_p.clear();
         valores.clear();
         valores_nuevos.value.clear();
+        Navigator.of(context).pop();
         Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -199,7 +233,7 @@ Future<void> cerrar_sesion(context) async {
             ));
         userCon.clear();
         passCon.clear();
-        dispCon.clear();
+        dispCon = "";
         Map r = jsonDecode(respuesta.body);
         mensaje = r['mensaje'];
         color = Colors.amber;
@@ -208,7 +242,8 @@ Future<void> cerrar_sesion(context) async {
   } on Exception catch (e) {
     userCon.clear();
     passCon.clear();
-    dispCon.clear();
+    dispCon = "";
+    Navigator.of(context).pop();
     Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -221,10 +256,6 @@ Future<void> cerrar_sesion(context) async {
     alertaPersonalizada(context, color, mensaje);
   }
 }
-
-
-
-
 
 //-----------------------------MONITOREO-----------------------------
 Future<void> monitoreo(context) async {
@@ -262,7 +293,7 @@ Future<void> monitoreo(context) async {
 
         userCon.clear();
         passCon.clear();
-        dispCon.clear();
+        dispCon = "";
 
         Navigator.pushReplacement(
             context,
@@ -305,7 +336,7 @@ Future<void> monitoreo(context) async {
 
         userCon.clear();
         passCon.clear();
-        dispCon.clear();
+        dispCon = "";
 
         Navigator.pushReplacement(
             context,
@@ -327,7 +358,7 @@ Future<void> monitoreo(context) async {
 
         userCon.clear();
         passCon.clear();
-        dispCon.clear();
+        dispCon = "";
 
         Navigator.pushReplacement(
             context,
@@ -349,7 +380,7 @@ Future<void> monitoreo(context) async {
 
         userCon.clear();
         passCon.clear();
-        dispCon.clear();
+        dispCon = "";
 
         Navigator.pushReplacement(
             context,
@@ -367,10 +398,6 @@ Future<void> monitoreo(context) async {
     alertaPersonalizada(context, Colors.amber, "Error\n${e}");
   } finally {}
 }
-
-
-
-
 
 Future<void> apagar_encender(int index, context) async {
   bool estado;
@@ -440,7 +467,7 @@ Future<void> apagar_encender(int index, context) async {
 //           // TODO
 //           userCon.clear();
 //           passCon.clear();
-//           dispCon.clear();
+//           dispCon = "";
 //           Navigator.of(context).pop();
 //           //dialogo(1, "La API no esta funcionando", context);
 //         } finally {
@@ -469,7 +496,7 @@ Future<void> apagar_encender(int index, context) async {
 //               print(valores.length);
 //               userCon.clear();
 //               passCon.clear();
-//               dispCon.clear();
+//               dispCon = "";
 //               Navigator.of(context).pop();
 //               Navigator.pushReplacement(
 //                   context,
@@ -481,7 +508,7 @@ Future<void> apagar_encender(int index, context) async {
 //             case 403:
 //               userCon.clear();
 //               passCon.clear();
-//               dispCon.clear();
+//               dispCon = "";
 //               Navigator.of(context).pop();
 //               dialogo(2, "No se encontro el dispositivo", context);
 //               break;
@@ -489,7 +516,7 @@ Future<void> apagar_encender(int index, context) async {
 //             case 405:
 //               userCon.clear();
 //               passCon.clear();
-//               dispCon.clear();
+//               dispCon = "";
 //               Navigator.of(context).pop();
 //               dialogo(1, "Error con el usuario y/o contraseña", context);
 //               break;
@@ -497,7 +524,7 @@ Future<void> apagar_encender(int index, context) async {
 //             case 406:
 //               userCon.clear();
 //               passCon.clear();
-//               dispCon.clear();
+//               dispCon = "";
 //               Navigator.of(context).pop();
 //               dialogo(
 //                   1, "No se logro conectar al dispositivo ingresado", context);

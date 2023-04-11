@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:velocom_app/screens/funciones.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+class LoginScreenPrueba extends StatefulWidget {
+  const LoginScreenPrueba({Key? key}) : super(key: key);
 
   @override
-  State<LoginScreen> createState() => _LoginScreen();
+  State<LoginScreenPrueba> createState() => _LoginScreenPrueba();
 }
 
-class _LoginScreen extends State<LoginScreen> {
+class _LoginScreenPrueba extends State<LoginScreenPrueba> {
   String placeUsuario = "Usuario";
   String placeContra = "Contraseña";
   String placeDisp = "Dispositivo";
@@ -122,10 +122,9 @@ class _LoginScreen extends State<LoginScreen> {
                   ElevatedButton(
                       style: TextButton.styleFrom(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 80, vertical: 15)),
+                              horizontal: 80, vertical: 20)),
                       onPressed: () {
                         showDialog(
-                          barrierDismissible: false,
                           context: context,
                           builder: (context) {
                             return const Center(

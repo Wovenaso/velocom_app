@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:velocom_app/screens/log_in.dart';
+import 'package:velocom_app/screens/log_in_escritorio.dart';
 import 'package:velocom_app/screens/movil_screen.dart';
 import 'package:velocom_app/screens/principal.dart';
+import 'package:velocom_app/screens/splash_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,7 +21,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.red,
       ),
       debugShowCheckedModeBanner: false,
-      home: const LoginScreen(),
+      home: const SplashScreen(),
     );
   }
 }

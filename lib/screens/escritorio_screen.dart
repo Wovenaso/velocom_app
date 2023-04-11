@@ -34,16 +34,14 @@ class _EscritorioScreenState extends State<EscritorioScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.logout),
-        onPressed: () {
-          timer?.cancel();
-          cerrar_sesion(context);
-        },
-      ),
       appBar: AppBar(
-        title: const Text("Velocom Movil"),
+        title: Image.asset("images/logovelocom.png", width: 100, height: 70),
         actions: <Widget>[
+          const Text(
+            "Monitoreo",
+            style: TextStyle(
+                height: 4.0, leadingDistribution: TextLeadingDistribution.even),
+          ),
           Switch.adaptive(
             value: estMonitoreo,
             onChanged: (bool? value) {
@@ -57,28 +55,37 @@ class _EscritorioScreenState extends State<EscritorioScreen> {
                 }
               });
             },
-          )
+          ),
+          const SizedBox(width: 70),
+          IconButton(
+              onPressed: () {
+                showDialog(
+                  barrierDismissible: false,
+                  context: context,
+                  builder: (context) {
+                    return const Center(child: CircularProgressIndicator());
+                  },
+                );
+                timer?.cancel();
+                cerrar_sesion(context);
+              },
+              icon: const Icon(Icons.logout)),
         ],
       ),
-      backgroundColor: Colors.deepOrange[50],
       body: Column(children: [
-        AspectRatio(
-            aspectRatio: 16/9,
-            child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Container(
-                  height: 600,
-                  color: Colors.orange[200],
-                  child: ValueListenableBuilder(
-                    valueListenable: valores_nuevos,
-                    builder: (BuildContext context, value, Widget? child) {
-                      return ListViewPuertos(
-                        puertos: lista_p,
-                        valores: valores_nuevos.value,
-                      );
-                    },
-                  ),
-                )))
+        SingleChildScrollView(
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height - 100,
+            child: ValueListenableBuilder(
+              valueListenable: valores_nuevos,
+              builder: (BuildContext context, value, Widget? child) {
+                return ListViewPuertos(
+                  puertos: lista_p,
+                  valores: valores_nuevos.value,
+                );
+              },
+            ),
+          )),
       ]),
     );
   }
