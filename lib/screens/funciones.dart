@@ -28,33 +28,33 @@ final disp_disponibles = ValueNotifier<List<dynamic>>([0, 0]);
 Future<void> obtener_dispositivos(context) async {
   var url = Uri.parse("http://10.254.254.128:5000/dispositivos");
 
-  //try {
-  http.Response respuesta = await http.get(url);
+  try {
+    http.Response respuesta = await http.get(url);
 
-  switch (respuesta.statusCode) {
-    case 200:
-      var temp = jsonDecode(respuesta.body);
-      print(temp);
-      dispositivos = temp['dispositivos'];
-      Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const LoginScreen(),
-          ));
-      break;
-    case 400:
-      alertaPersonalizada(
-          context, Colors.amber, "Ocurrio un error inesperado, 400");
-      break;
-    case 500:
-      alertaPersonalizada(
-          context, Colors.amber, "Ocurrio un error inesperado, 500");
-      break;
+    switch (respuesta.statusCode) {
+      case 200:
+        var temp = jsonDecode(respuesta.body);
+        print(temp);
+        dispositivos = temp['dispositivos'];
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const LoginScreen(),
+            ));
+        break;
+      case 400:
+        alertaPersonalizada(
+            context, Colors.amber, "Ocurrio un error inesperado, 400");
+        break;
+      case 500:
+        alertaPersonalizada(
+            context, Colors.amber, "Ocurrio un error inesperado, 500");
+        break;
+    }
+  } catch (e) {
+    print(e);
+    alertaPersonalizada(context, Colors.amber, "Ocurrio un error inesperado");
   }
-  //} catch (e) {
-//print(e);
-  // alertaPersonalizada(context, Colors.amber, "Ocurrio un error inesperado");
-  // }
 }
 
 Future<void> inicio_sesion(
@@ -163,7 +163,7 @@ Future<void> inicio_sesion(
         passCon.clear();
         dispCon = "";
         Navigator.of(context).pop();
-        r['mensaje'];
+        alertaPersonalizada(context, Colors.amber, r['mensaje']);
         break;
     }
   } on Exception catch (e) {
@@ -443,102 +443,3 @@ Future<void> apagar_encender(int index, context) async {
         context, Colors.red, "Error apagar o encender puerto\n${e.toString()}");
   }
 }
-
-
-
-// Future inicio(user, pass, disp, context) async {
-//   var url = Uri.parse("http://10.254.255.101:5000/inicio");
-//   var response;
-
-//   print(user);
-//   print(pass);
-//   print(disp);
-
-//   if (user != "") {
-//     if (pass != "") {
-//       if (disp != "") {
-//         try {
-//           var obj = jsonEncode(
-//               {'nombre_disp': disp, 'usuario': user, 'contra': pass});
-
-//           response = await http.post(url,
-//               headers: {"Content-Type": 'application/json'}, body: obj);
-//         } on Exception catch (e) {
-//           // TODO
-//           userCon.clear();
-//           passCon.clear();
-//           dispCon = "";
-//           Navigator.of(context).pop();
-//           //dialogo(1, "La API no esta funcionando", context);
-//         } finally {
-//           print(response?.statusCode);
-
-//           switch (response?.statusCode) {
-//             case 200:
-//               Map r = jsonDecode(response?.body);
-
-//               lista_p.clear();
-//               valores.clear();
-//               valores_nuevos.value.clear();
-
-//               tipo = r['tipo'];
-//               lista_p = r['puertos'];
-
-//               valores = List<dynamic>.generate(lista_p.length, (i) {
-//                 return [0, 0];
-//               });
-
-//               valores_nuevos.value =
-//                   List<dynamic>.generate(lista_p.length, (index) {
-//                 return [0, 0];
-//               });
-
-//               print(valores.length);
-//               userCon.clear();
-//               passCon.clear();
-//               dispCon = "";
-//               Navigator.of(context).pop();
-//               Navigator.pushReplacement(
-//                   context,
-//                   mat.MaterialPageRoute(
-//                     builder: (context) => const NavigationScreen(),
-//                   ));
-//               break;
-
-//             case 403:
-//               userCon.clear();
-//               passCon.clear();
-//               dispCon = "";
-//               Navigator.of(context).pop();
-//               dialogo(2, "No se encontro el dispositivo", context);
-//               break;
-
-//             case 405:
-//               userCon.clear();
-//               passCon.clear();
-//               dispCon = "";
-//               Navigator.of(context).pop();
-//               dialogo(1, "Error con el usuario y/o contraseña", context);
-//               break;
-
-//             case 406:
-//               userCon.clear();
-//               passCon.clear();
-//               dispCon = "";
-//               Navigator.of(context).pop();
-//               dialogo(
-//                   1, "No se logro conectar al dispositivo ingresado", context);
-
-//               break;
-//           }
-//         }
-//       } else {
-//         Navigator.of(context).pop();
-//         dialogo(2, "Ingrese un usuario", context);
-//       }
-//     } else {}
-//   } else {
-//     Navigator.of(context).pop();
-//     dialogo(2, "Ingrese un dispositivo para conectarse", context);
-//   }
-// }
